@@ -28,10 +28,13 @@ brand colours, photos and copy. Lead capture stays WhatsApp-based.
 ## Stack
 
 - Single `index.html`, inline `<style>`, inline `<script>`.
-- GSAP 3.12.5 + ScrollTrigger from jsDelivr (as today) for pinned sections and
-  reveals. The page must be fully readable if GSAP fails to load.
-- `serve.mjs` / `screenshot.mjs` (Node + Puppeteer) copied into the project for
-  localhost screenshots.
+- ~~GSAP 3.12.5 + ScrollTrigger~~ **Changed during build:** pinned sections use
+  CSS `position: sticky` + a small vanilla scroll-progress script, reveals use
+  IntersectionObserver. No third-party scripts at all, so nothing external can
+  block rendering. The page is fully readable with JS off (stacked layout).
+- `serve.mjs` copied into the project (`PORT=3005 node serve.mjs`). Puppeteer
+  screenshots run from `~/Desktop/ZT/` (`node screenshot.mjs <url> <label>
+  <viewport>`), where Puppeteer is installed.
 - `?static` query param renders the final state with no animation.
 
 ## Visual system
