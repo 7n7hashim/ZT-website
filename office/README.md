@@ -10,7 +10,7 @@ financial data must never be added to this public repository.
 It has three sections:
 
 - **Overview:** sales and performance charts.
-- **Who owes us money:** each customer's balance, phone number, how late they are, and the next follow-up.
+- **Debtors** (customers who owe Zaras money): each customer's balance, phone number, how late they are, and the next follow-up.
 - **Follow-ups:** who to contact, most urgent first.
 
 Everything is in `index.html`, with the fonts and logo stored alongside it.

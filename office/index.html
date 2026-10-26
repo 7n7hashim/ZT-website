@@ -328,7 +328,7 @@ const COLLECTED = [1540000, 1810000, 2260000, 1830000, 1490000, 1720000, 1690000
 const MONTHS = SALES.map((_, i) => { const d = new Date(TODAY.getFullYear(), TODAY.getMonth() - 11 + i, 1); return { short: MON[d.getMonth()], long: `${MONTH_LONG[d.getMonth()]} ${d.getFullYear()}` }; });
 const SERVICES = [["Flights", 9420000], ["Tours & packages", 6180000], ["Hotels", 4310000], ["Visas", 1260000], ["Transfers", 980000], ["Insurance", 640000]];
 
-// Who owes us money. days: days past due (negative = not yet due). next: days until next follow-up.
+// Debtors: customers who owe Zaras money. days: days past due (negative = not yet due). next: days until next follow-up.
 const DEBTORS = [
   { name: "Coast Academy Schools Ltd", who: "J. Karisa, Bursar", phone: "+254 700 000 102", days: 45, next: -1,
     note: "Bursar promised to clear the balance this week.", noteBy: "Yusuf", noteOn: -8,
@@ -509,7 +509,7 @@ function owedView() {
   const owed = DEBTORS.reduce((s, d) => s + d.owed, 0), overdue = DEBTORS.filter(d => d.days > 0);
   const th = (k, l, cls = "") => `<th class="${cls}" ${S.sort === k ? `aria-sort="${S.dir > 0 ? "ascending" : "descending"}"` : ""}><button data-sort="${k}">${l}${S.sort === k ? (S.dir > 0 ? " ↑" : " ↓") : ""}</button></th>`;
   return `
-  <div class="head"><div><h1>Who owes us <em>money?</em></h1><p>Every customer with an unpaid balance, as of today.</p></div></div>
+  <div class="head"><div><h1>Our <em>debtors</em></h1><p>Customers who owe Zaras Travel money, as of today.</p></div></div>
   <section class="totals">
     <div class="card total"><div class="lab">Owed to us</div><div class="v">${kes(owed)}</div><div class="s">${DEBTORS.length} customers</div></div>
     <div class="card total"><div class="lab">Overdue</div><div class="v" style="color:var(--bad)">${kes(overdue.reduce((s, d) => s + d.owed, 0))}</div><div class="s">${overdue.length} customers past their due date</div></div>
@@ -579,7 +579,7 @@ function closeDrawer() {
 }
 
 /* ============================================================ routing & events */
-const ROUTES = { overview: ["Overview", overview], owed: ["Who owes us money", owedView], followups: ["Follow-ups", followupsView] };
+const ROUTES = { overview: ["Overview", overview], owed: ["Debtors", owedView], followups: ["Follow-ups", followupsView] };
 function render(keepFocus) {
   const r = ROUTES[location.hash.slice(1)] ? location.hash.slice(1) : "overview";
   const due = DEBTORS.filter(d => d.next <= 0).length;
