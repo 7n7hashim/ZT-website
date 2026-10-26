@@ -1,0 +1,623 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Zaras Travel — Dashboard (demo)</title>
+<link rel="icon" href="mark.png">
+<style>
+@font-face { font-family: "Spectral"; src: url("fonts/Spectral_400Regular.ttf") format("truetype"); font-weight: 400; font-display: swap; }
+@font-face { font-family: "Spectral"; src: url("fonts/Spectral_400Regular_Italic.ttf") format("truetype"); font-weight: 400; font-style: italic; font-display: swap; }
+@font-face { font-family: "Spectral"; src: url("fonts/Spectral_500Medium.ttf") format("truetype"); font-weight: 500; font-display: swap; }
+@font-face { font-family: "Plex"; src: url("fonts/IBMPlexSans_400Regular.ttf") format("truetype"); font-weight: 400; font-display: swap; }
+@font-face { font-family: "Plex"; src: url("fonts/IBMPlexSans_500Medium.ttf") format("truetype"); font-weight: 500; font-display: swap; }
+@font-face { font-family: "Plex"; src: url("fonts/IBMPlexSans_600SemiBold.ttf") format("truetype"); font-weight: 600; font-display: swap; }
+@font-face { font-family: "DM Mono"; src: url("fonts/DMMono_400Regular.ttf") format("truetype"); font-weight: 400; font-display: swap; }
+
+:root {
+  --night: #121c26;        /* header */
+  --night-2: #1c2834;
+  --night-ink: #c3ccd5;
+  --bg: #f3f5f6;           /* workspace */
+  --paper: #ffffff;
+  --sunk: #f8f9fa;
+  --ink: #15212c;
+  --ink-2: #47535f;
+  --mute: #75808b;
+  --faint: #a3acb5;
+  --line: #e5e9ec;
+  --line-2: #d6dce1;
+  --brand: #e2711d;        /* Zaras orange */
+  --sales: #255a9e;        /* chart: sales (from the logo's blue) */
+  --coll: #d9772b;         /* chart: money collected */
+  --good: #23704f; --good-wash: #e6f2ec;
+  --warn: #8d5b00; --warn-wash: #fbf1dc;
+  --bad: #b02a1f; --bad-wash: #fbecea;
+  /* how late — one warm severity ramp */
+  --age0: #c8d2db; --age1: #efc27d; --age2: #e3923f; --age3: #c95a2a; --age4: #9e261c;
+
+  --display: "Spectral", Georgia, serif;
+  --sans: "Plex", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono: "DM Mono", ui-monospace, Menlo, monospace;
+
+  --r: 14px; --r-sm: 8px;
+  --e1: 0 1px 2px rgba(21, 33, 44, .04), 0 2px 8px -2px rgba(21, 33, 44, .06);
+  --e2: 0 2px 4px rgba(21, 33, 44, .05), 0 12px 32px -8px rgba(21, 33, 44, .16);
+  --e3: 0 4px 10px rgba(21, 33, 44, .08), 0 32px 64px -16px rgba(21, 33, 44, .32);
+  --ring: 0 0 0 3px rgba(37, 90, 158, .3);
+  --ease: cubic-bezier(.2, .8, .2, 1);
+  --spring: cubic-bezier(.2, .9, .25, 1.06);
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body { background: var(--bg); color: var(--ink); font: 400 14.5px/1.6 var(--sans); -webkit-font-smoothing: antialiased; }
+button, input { font: inherit; color: inherit; }
+.num { font-variant-numeric: tabular-nums; }
+.mono { font-family: var(--mono); font-size: .9em; letter-spacing: -.01em; }
+.muted { color: var(--mute); }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+/* ---------- Header ---------- */
+.top { background: var(--paper); position: sticky; top: 0; z-index: 30; border-bottom: 1px solid var(--line); box-shadow: 0 1px 2px rgba(21, 33, 44, .03), 0 8px 24px -16px rgba(21, 33, 44, .18); }
+.top-in { max-width: 1200px; margin: 0 auto; padding: 0 32px; display: flex; align-items: center; gap: 44px; height: 88px; }
+.brand { display: flex; align-items: center; flex: none; border-radius: 6px; transition: opacity .15s var(--ease); }
+.brand:hover { opacity: .85; }
+.brand:active { opacity: .7; }
+.brand:focus-visible { outline: none; box-shadow: var(--ring); }
+.brand img { display: block; height: 58px; width: auto; }
+.tabs { display: flex; gap: 4px; height: 100%; }
+.tabs a {
+  position: relative; display: flex; align-items: center; padding: 0 14px; color: var(--ink-2); text-decoration: none; font-weight: 500;
+  transition: color .15s var(--ease);
+}
+.tabs a::after { content: ""; position: absolute; left: 14px; right: 14px; bottom: 0; height: 2px; border-radius: 2px 2px 0 0; background: var(--brand); transform: scaleX(0); transition: transform .25s var(--spring); }
+.tabs a:hover { color: var(--ink); }
+.tabs a:active { color: var(--night); }
+.tabs a:focus-visible { outline: none; color: var(--ink); box-shadow: inset 0 0 0 2px var(--sales); border-radius: 6px; }
+.tabs a[aria-current="page"] { color: var(--ink); }
+.tabs a[aria-current="page"]::after { transform: scaleX(1); }
+.tabs .count { margin-left: 8px; min-width: 20px; padding: 0 6px; border-radius: 99px; background: var(--brand); color: #fff; font-size: 11.5px; font-weight: 600; line-height: 19px; text-align: center; }
+.demo-tag { margin-left: auto; display: flex; align-items: center; gap: 8px; font-size: 12.5px; color: var(--mute); flex: none; }
+.demo-tag b { background: #fff4ea; color: #b4570f; border: 1px solid #f2c9a2; font-size: 11px; letter-spacing: .08em; padding: 2px 8px; border-radius: 99px; font-weight: 600; }
+
+/* ---------- Page ---------- */
+.page { max-width: 1200px; margin: 0 auto; padding: 44px 32px 80px; }
+.head { display: flex; align-items: flex-end; justify-content: space-between; gap: 20px; flex-wrap: wrap; margin-bottom: 28px; }
+.head h1 { font-family: var(--display); font-weight: 400; font-size: 42px; line-height: 1.08; letter-spacing: -.025em; margin: 0; }
+.head h1 em { font-style: italic; color: var(--ink-2); }
+.head p { margin: 8px 0 0; color: var(--mute); }
+.note { margin: 0 0 24px; padding: 10px 14px; border-radius: var(--r-sm); background: #fff7ee; border: 1px solid #f3dcc0; color: #7a4511; font-size: 13px; display: flex; gap: 10px; align-items: flex-start; }
+.note svg { flex: none; margin-top: 3px; }
+
+.seg { display: inline-flex; background: #e6eaed; border-radius: 10px; padding: 3px; gap: 2px; }
+.seg button { border: 0; background: transparent; height: 32px; padding: 0 14px; border-radius: 8px; font-weight: 500; color: var(--ink-2); cursor: pointer; transition: background-color .15s var(--ease), color .15s var(--ease); }
+.seg button:hover { color: var(--ink); background: rgba(255,255,255,.55); }
+.seg button:active { background: rgba(255,255,255,.85); }
+.seg button:focus-visible { outline: none; box-shadow: var(--ring); }
+.seg button[aria-pressed="true"] { background: var(--paper); color: var(--ink); box-shadow: var(--e1); }
+
+.card { background: var(--paper); border: 1px solid var(--line); border-radius: var(--r); box-shadow: var(--e1); min-width: 0; }
+.card-h { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; padding: 22px 26px 0; flex-wrap: wrap; }
+.card-h h2 { font-family: var(--display); font-weight: 500; font-size: 21px; letter-spacing: -.015em; margin: 0; line-height: 1.25; }
+.card-h p { margin: 2px 0 0; color: var(--mute); font-size: 13px; }
+.card-b { padding: 18px 26px 24px; }
+
+/* KPIs */
+.kpis { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; margin-bottom: 16px; }
+.kpi { padding: 20px 22px 18px; display: flex; flex-direction: column; }
+.kpi .lab { font-size: 13px; color: var(--ink-2); font-weight: 500; }
+.kpi .val { font-size: 30px; font-weight: 600; letter-spacing: -.03em; line-height: 1.15; margin-top: 8px; font-variant-numeric: tabular-nums; }
+.kpi .val small { font-size: 13px; font-weight: 500; color: var(--mute); letter-spacing: 0; margin-right: 5px; }
+.kpi .delta { font-size: 12.5px; margin-top: 4px; color: var(--mute); }
+.kpi .delta b { font-weight: 600; }
+.up { color: var(--good); } .down { color: var(--bad); }
+.kpi .spark { margin-top: 14px; height: 36px; }
+.kpi .spark svg { display: block; width: 100%; height: 36px; }
+.kpi.alert .val { color: var(--bad); }
+
+.grid-2 { display: grid; grid-template-columns: 1.65fr 1fr; gap: 16px; margin-bottom: 16px; }
+.grid-even { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+
+/* Charts */
+.chart { position: relative; }
+.chart svg { display: block; width: 100%; height: auto; overflow: visible; }
+.chart .axis text { fill: var(--mute); font: 11px var(--sans); }
+.chart .grid line { stroke: #edf0f2; }
+.chart .base { stroke: #cfd6dc; }
+.chart .band { fill: #f1f4f6; opacity: 0; transition: opacity .12s; }
+.chart .hit { fill: transparent; }
+.legend { display: flex; gap: 18px; font-size: 12.5px; color: var(--ink-2); flex-wrap: wrap; }
+.legend i { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 7px; vertical-align: -1px; }
+.tip { position: fixed; z-index: 90; pointer-events: none; background: var(--night); color: #fff; border-radius: 10px; padding: 9px 12px; font-size: 12.5px; line-height: 1.55; box-shadow: var(--e3); opacity: 0; transform: translateY(4px); transition: opacity .12s var(--ease), transform .12s var(--ease); min-width: 180px; }
+.tip.on { opacity: 1; transform: none; }
+.tip .r { display: flex; justify-content: space-between; gap: 16px; font-variant-numeric: tabular-nums; }
+.tip i { display: inline-block; width: 8px; height: 8px; border-radius: 2px; margin-right: 7px; }
+
+.hbar { display: grid; grid-template-columns: 120px 1fr 92px; gap: 12px; align-items: center; padding: 7px 0; font-size: 13.5px; }
+.hbar .track { height: 10px; border-radius: 5px; background: #eef1f3; overflow: hidden; }
+.hbar .fill { height: 100%; border-radius: 5px; background: var(--sales); transform-origin: left; animation: grow .7s var(--ease) both; }
+.hbar .v { text-align: right; font-variant-numeric: tabular-nums; font-weight: 500; }
+.hbar .v span { color: var(--mute); font-weight: 400; font-size: 12px; margin-left: 6px; }
+@keyframes grow { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+
+.ageing { display: flex; height: 14px; gap: 3px; border-radius: 7px; overflow: hidden; margin: 6px 0 18px; }
+.ageing span { display: block; min-width: 4px; transform-origin: left; animation: grow .7s var(--ease) both; }
+.kpi .ageing span { animation: none; }
+.age-rows { display: grid; gap: 2px; }
+.age-row { display: grid; grid-template-columns: 14px 1fr auto auto; gap: 10px; align-items: center; padding: 7px 0; border-top: 1px solid var(--line); font-size: 13.5px; }
+.age-row:first-child { border-top: 0; }
+.age-row i { width: 10px; height: 10px; border-radius: 3px; }
+.age-row .n { color: var(--mute); font-size: 12.5px; }
+.age-row .v { font-weight: 600; font-variant-numeric: tabular-nums; min-width: 110px; text-align: right; }
+
+/* ---------- Tables ---------- */
+.toolbar { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; padding: 18px 26px; border-bottom: 1px solid var(--line); }
+.toolbar .grow { flex: 1; }
+.search { position: relative; }
+.search svg { position: absolute; left: 12px; top: 50%; translate: 0 -50%; color: var(--mute); pointer-events: none; }
+.search input { height: 38px; width: 300px; max-width: 100%; border: 1px solid var(--line-2); border-radius: 10px; padding: 0 12px 0 36px; background: var(--paper); transition: border-color .15s var(--ease), box-shadow .15s var(--ease); }
+.search input:hover { border-color: #bcc5cd; }
+.search input:focus-visible { outline: none; border-color: var(--sales); box-shadow: var(--ring); }
+.chips { display: flex; gap: 6px; flex-wrap: wrap; }
+.chip { height: 34px; padding: 0 14px; border-radius: 99px; border: 1px solid var(--line-2); background: var(--paper); font-weight: 500; font-size: 13px; color: var(--ink-2); cursor: pointer; display: inline-flex; align-items: center; gap: 7px; transition: background-color .15s var(--ease), border-color .15s var(--ease), color .15s var(--ease); }
+.chip:hover { border-color: #b4bec7; color: var(--ink); }
+.chip:active { background: #f0f3f5; }
+.chip:focus-visible { outline: none; box-shadow: var(--ring); }
+.chip[aria-pressed="true"] { background: var(--night); border-color: var(--night); color: #fff; }
+.chip .n { opacity: .7; font-variant-numeric: tabular-nums; font-size: 12px; }
+
+table.list { width: 100%; border-collapse: separate; border-spacing: 0; }
+.list th { text-align: left; font-size: 12px; font-weight: 500; color: var(--mute); padding: 12px 16px; border-bottom: 1px solid var(--line); background: var(--sunk); white-space: nowrap; }
+.list th:first-child, .list td:first-child { padding-left: 26px; }
+.list th:last-child, .list td:last-child { padding-right: 26px; }
+.list th.r, .list td.r { text-align: right; }
+.list th button { all: unset; cursor: pointer; border-radius: 4px; display: inline-flex; gap: 5px; align-items: center; }
+.list th button:hover { color: var(--ink); }
+.list th button:focus-visible { box-shadow: var(--ring); }
+.list td { padding: 16px; border-bottom: 1px solid var(--line); vertical-align: middle; }
+.list tbody tr { cursor: pointer; transition: background-color .12s var(--ease); }
+.list tbody tr:hover { background: #f8fafb; }
+.list tbody tr:active { background: #f1f4f6; }
+.list tbody tr:focus-visible { outline: none; background: #f2f6fa; box-shadow: inset 3px 0 0 var(--sales); }
+.list tbody tr:last-child td { border-bottom: 0; }
+.who { display: flex; align-items: center; gap: 12px; min-width: 0; }
+.avatar { width: 36px; height: 36px; border-radius: 50%; display: grid; place-items: center; font-size: 12.5px; font-weight: 600; flex: none; color: var(--ink-2); background: #e9eef2; }
+.who b { display: block; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.who div > span { display: block; font-size: 12.5px; color: var(--mute); }
+.amount { font-weight: 600; font-variant-numeric: tabular-nums; font-size: 15px; white-space: nowrap; }
+.phone { font-family: var(--mono); font-size: 13px; color: var(--ink-2); white-space: nowrap; }
+
+/* Signature: the lateness scale — where this debt sits between "not yet due" and "over 90 days" */
+.late { display: flex; flex-direction: column; gap: 6px; min-width: 150px; }
+.late .txt { font-size: 13px; font-weight: 500; white-space: nowrap; }
+.scale { display: grid; grid-template-columns: repeat(5, 1fr); gap: 3px; width: 120px; }
+.scale i { height: 5px; border-radius: 3px; background: #e7ebee; }
+.next { white-space: nowrap; font-size: 13.5px; }
+.next small { display: block; font-size: 12px; color: var(--mute); }
+.pill { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 500; padding: 2px 9px; border-radius: 99px; white-space: nowrap; }
+.pill::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+.p-bad { color: var(--bad); background: var(--bad-wash); }
+.p-warn { color: var(--warn); background: var(--warn-wash); }
+.p-ok { color: var(--ink-2); background: #eceff2; }
+.p-good { color: var(--good); background: var(--good-wash); }
+.foot { display: flex; justify-content: space-between; gap: 16px; padding: 14px 26px; border-top: 1px solid var(--line); color: var(--mute); font-size: 12.5px; flex-wrap: wrap; }
+
+.totals { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; margin-bottom: 16px; }
+.total { padding: 20px 22px; }
+.total .lab { font-size: 13px; color: var(--ink-2); font-weight: 500; }
+.total .v { font-size: 26px; font-weight: 600; letter-spacing: -.025em; margin-top: 6px; font-variant-numeric: tabular-nums; line-height: 1.2; }
+.total .s { font-size: 12.5px; color: var(--mute); margin-top: 2px; }
+
+.empty { text-align: center; padding: 56px 20px; color: var(--mute); }
+.empty strong { display: block; color: var(--ink); font-family: var(--display); font-weight: 500; font-size: 20px; margin-bottom: 4px; }
+
+/* ---------- Follow-ups ---------- */
+.fu-group { margin-bottom: 28px; }
+.fu-group h2 { font-family: var(--display); font-weight: 500; font-size: 22px; letter-spacing: -.015em; margin: 0 0 4px; display: flex; align-items: baseline; gap: 10px; }
+.fu-group h2 span { font-family: var(--sans); font-size: 13px; color: var(--mute); font-weight: 400; letter-spacing: 0; }
+.fu-group > p { margin: 0 0 14px; color: var(--mute); font-size: 13px; }
+.fu { display: grid; grid-template-columns: 4px minmax(0, 1.3fr) minmax(0, 1.6fr) 170px; gap: 20px; align-items: center; padding: 18px 24px 18px 0; border-top: 1px solid var(--line); cursor: pointer; transition: background-color .12s var(--ease); }
+.fu:first-child { border-top: 0; }
+.fu:hover { background: #f8fafb; }
+.fu:active { background: #f1f4f6; }
+.fu:focus-visible { outline: none; background: #f2f6fa; }
+.fu .edge { align-self: stretch; border-radius: 0 3px 3px 0; }
+.fu .why { font-size: 13.5px; color: var(--ink-2); }
+.fu .why q { quotes: "“" "”"; color: var(--ink); }
+.fu .why small { display: block; color: var(--mute); font-size: 12.5px; margin-top: 2px; }
+.fu .right { text-align: right; display: flex; flex-direction: column; align-items: flex-end; gap: 6px; }
+
+/* ---------- Drawer ---------- */
+.scrim { position: fixed; inset: 0; background: rgba(18, 28, 38, .38); z-index: 60; opacity: 0; pointer-events: none; transition: opacity .25s var(--ease); }
+.scrim.on { opacity: 1; pointer-events: auto; }
+.drawer { position: fixed; top: 0; right: 0; bottom: 0; width: min(460px, 100%); z-index: 70; background: var(--paper); box-shadow: var(--e3); transform: translateX(104%); transition: transform .38s var(--spring); display: flex; flex-direction: column; }
+.drawer.on { transform: none; }
+.drawer-h { padding: 26px 28px 20px; border-bottom: 1px solid var(--line); display: flex; gap: 14px; align-items: flex-start; }
+.drawer-h h3 { font-family: var(--display); font-weight: 500; font-size: 26px; letter-spacing: -.02em; margin: 0; line-height: 1.15; }
+.drawer-h p { margin: 4px 0 0; color: var(--mute); font-size: 13px; }
+.x { margin-left: auto; width: 36px; height: 36px; border-radius: 10px; border: 1px solid var(--line-2); background: var(--paper); cursor: pointer; display: grid; place-items: center; flex: none; transition: background-color .15s var(--ease), transform .2s var(--spring); }
+.x:hover { background: var(--sunk); }
+.x:active { transform: scale(.94); }
+.x:focus-visible { outline: none; box-shadow: var(--ring); }
+.drawer-b { padding: 22px 28px 32px; overflow-y: auto; display: flex; flex-direction: column; gap: 22px; }
+.big { font-size: 34px; font-weight: 600; letter-spacing: -.03em; font-variant-numeric: tabular-nums; line-height: 1.1; }
+.dl { display: grid; grid-template-columns: 120px 1fr; gap: 10px 14px; margin: 0; font-size: 13.5px; }
+.dl dt { color: var(--mute); }
+.dl dd { margin: 0; }
+.sub-h { font-size: 12px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--mute); margin: 0 0 10px; }
+.bk { display: flex; justify-content: space-between; gap: 12px; padding: 12px 0; border-top: 1px solid var(--line); font-size: 13.5px; }
+.bk:first-of-type { border-top: 0; }
+.bk .s { color: var(--mute); font-size: 12.5px; }
+.quote { background: var(--sunk); border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; font-size: 13.5px; color: var(--ink-2); }
+.quote b { display: block; font-weight: 500; color: var(--ink); font-size: 12.5px; margin-bottom: 2px; }
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 40px; padding: 0 16px; border-radius: 10px; border: 1px solid var(--line-2); background: var(--paper); font-weight: 500; text-decoration: none; color: var(--ink); cursor: pointer; transition: background-color .15s var(--ease), transform .2s var(--spring); }
+.btn:hover { background: var(--sunk); }
+.btn:active { transform: translateY(1px); }
+.btn:focus-visible { outline: none; box-shadow: var(--ring); }
+.btn.dark { background: var(--night); border-color: var(--night); color: #fff; }
+.btn.dark:hover { background: #263442; }
+
+/* ---------- Responsive ---------- */
+@media (max-width: 1080px) {
+  .kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .grid-2, .grid-even { grid-template-columns: 1fr; }
+  .demo-tag span { display: none; }
+}
+@media (max-width: 760px) {
+  .top-in { padding: 0 16px; gap: 12px; height: auto; flex-wrap: wrap; padding-top: 12px; }
+  .brand img { height: 42px; }
+  .tabs { order: 3; width: 100%; height: 46px; overflow-x: auto; margin: 0 -16px; padding: 0 6px; width: calc(100% + 32px); }
+  .tabs a { padding: 0 10px; white-space: nowrap; }
+  .tabs a::after { left: 10px; right: 10px; }
+  .page { padding: 28px 16px 64px; }
+  .head h1 { font-size: 32px; }
+  .kpis { gap: 10px; }
+  .kpi { padding: 16px; }
+  .kpi .val { font-size: 22px; }
+  .kpi .spark { display: none; }
+  .totals { grid-template-columns: 1fr; gap: 10px; }
+  .card-h, .card-b { padding-left: 18px; padding-right: 18px; }
+  .toolbar { padding: 14px 16px; }
+  .search, .search input { width: 100%; }
+  .hbar { grid-template-columns: 92px 1fr 78px; }
+  /* table rows become cards */
+  .list thead { display: none; }
+  .list, .list tbody, .list tr, .list td { display: block; width: 100%; }
+  .list tr { display: grid !important; grid-template-columns: minmax(0, 1fr) auto; gap: 8px 12px; padding: 16px; border-bottom: 1px solid var(--line); }
+  .list td { border: 0; padding: 0 !important; min-width: 0; }
+  .list td.c-phone { grid-column: 1; }
+  .list td.c-amount { grid-row: 1; grid-column: 2; text-align: right; }
+  .list td.c-late { grid-column: 1; }
+  .list td.c-next { grid-column: 2; grid-row: 2 / span 2; text-align: right; align-self: center; }
+  .fu { grid-template-columns: 4px 1fr; gap: 6px 14px; padding-right: 16px; }
+  .fu .why, .fu .right { grid-column: 2; }
+  .fu .right { text-align: left; align-items: flex-start; flex-direction: row; flex-wrap: wrap; }
+  .dl { grid-template-columns: 100px 1fr; }
+}
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition-duration: .01ms !important; } }
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="top-in">
+    <a class="brand" href="#overview"><img src="logo.png" alt="Zaras Travel — Making Your Travel Plans a Breeze" width="583" height="139"></a>
+    <nav class="tabs" id="tabs" aria-label="Sections"></nav>
+    <div class="demo-tag"><b>DEMO</b><span>Fictional sample data</span></div>
+  </div>
+</header>
+<main class="page" id="page" tabindex="-1"></main>
+<div class="tip" id="tip" role="tooltip"></div>
+<div class="scrim" id="scrim"></div>
+<aside class="drawer" id="drawer" role="dialog" aria-modal="true" aria-labelledby="dh" aria-hidden="true"></aside>
+
+<script>
+"use strict";
+/* ============================================================
+   FICTIONAL SAMPLE DATA — every name, number and amount below is made up.
+   In the real dashboard these figures will come from the imported Excel records.
+   ============================================================ */
+const TODAY = (() => { const d = new Date(); d.setHours(0, 0, 0, 0); return d; })();
+const addDays = n => { const d = new Date(TODAY); d.setDate(d.getDate() + n); return d; };
+const MON = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+const MONTH_LONG = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+
+// Last 12 months, oldest first. The final month is "so far".
+const SALES = [1620000, 1950000, 2480000, 1710000, 1540000, 1880000, 1660000, 2210000, 2940000, 2370000, 1980000, 1734500];
+const COLLECTED = [1540000, 1810000, 2260000, 1830000, 1490000, 1720000, 1690000, 1980000, 2610000, 2450000, 1870000, 1421000];
+const MONTHS = SALES.map((_, i) => { const d = new Date(TODAY.getFullYear(), TODAY.getMonth() - 11 + i, 1); return { short: MON[d.getMonth()], long: `${MONTH_LONG[d.getMonth()]} ${d.getFullYear()}` }; });
+const SERVICES = [["Flights", 9420000], ["Tours & packages", 6180000], ["Hotels", 4310000], ["Visas", 1260000], ["Transfers", 980000], ["Insurance", 640000]];
+
+// Who owes us money. days: days past due (negative = not yet due). next: days until next follow-up.
+const DEBTORS = [
+  { name: "Coast Academy Schools Ltd", who: "J. Karisa, Bursar", phone: "+254 700 000 102", days: 45, next: -1,
+    note: "Bursar promised to clear the balance this week.", noteBy: "Yusuf", noteOn: -8,
+    items: [["ZT-2408", "School trip flights MBA–NBO, 32 passengers", 384000, -45]] },
+  { name: "Bahari Consulting Ltd", who: "Finance office", phone: "+254 700 000 104", days: 10, next: 0,
+    note: "Says KES 300,000 was sent by bank transfer. Checking the statement.", noteBy: "Amina", noteOn: -2,
+    items: [["ZT-2431", "Dubai conference — flights and hotel, 4 travellers", 612500, -10]] },
+  { name: "Shariff & Sons Hardware", who: "Mr. Shariff", phone: "+254 700 000 113", days: 18, next: -6,
+    note: "Accounts will process after month end.", noteBy: "Yusuf", noteOn: -20,
+    items: [["ZT-2427", "Guangzhou trade fair — flights, hotel and visas", 255000, -18]] },
+  { name: "Omar Abdalla", who: "Individual", phone: "+254 700 000 105", days: 70, next: 3,
+    note: "Disputes a KES 50,000 M-Pesa payment. Asked him to forward the original SMS.", noteBy: "Yusuf", noteOn: -18,
+    items: [["ZT-2389", "Umrah package, 2 travellers", 246000, -70]] },
+  { name: "Tana River Church Fellowship", who: "Treasurer", phone: "+254 700 000 111", days: 120, next: 9,
+    note: "Will pay the balance after the fundraiser.", noteBy: "Yusuf", noteOn: -12,
+    items: [["LEDGER-127", "Balance from earlier records", 210000, -120]] },
+  { name: "Peter Mwangi", who: "Family booking", phone: "+254 700 000 103", days: -5, next: 0,
+    note: "Reminded him the balance is due before travel.", noteBy: "Fatma", noteOn: -6,
+    items: [["ZT-2462", "Zanzibar holiday package, family of 5", 148000, 5]] },
+  { name: "Halima Said", who: "Individual", phone: "+254 700 000 101", days: 34, next: 2,
+    note: "Asked for a statement. Sent it the same day.", noteBy: "Fatma", noteOn: -16,
+    items: [["LEDGER-114", "Balance from earlier records", 65000, -34]] },
+  { name: "Amani Events Co.", who: "Event planner", phone: "+254 700 000 114", days: -12, next: 1,
+    note: "Paid KES 60,000. Balance after the event.", noteBy: "Amina", noteOn: -9,
+    items: [["ZT-2465", "Wedding guest transfers, Kilifi", 60000, 12]] },
+  { name: "Nyali Wellness Clinic", who: "Admin manager", phone: "+254 700 000 107", days: -18, next: 0,
+    note: null, items: [["ZT-2470", "Travel insurance, 12 staff", 54600, 18]] },
+  { name: "Kassim Mohamed", who: "Individual", phone: "+254 700 000 108", days: 28, next: -2,
+    note: "No answer after three calls. Number rings out.", noteBy: "Yusuf", noteOn: -8,
+    items: [["ZT-2440", "UK visitor visa processing, 2 applicants", 38000, -28]] },
+  { name: "Rehema Ochieng", who: "Individual", phone: "+254 700 000 110", days: 64, next: 5,
+    note: "Paying in two instalments. First one received.", noteBy: "Fatma", noteOn: -10,
+    items: [["ZT-2398", "Flights NBO–JNB return", 46200, -64]] },
+  { name: "Daniel Kiprop", who: "Individual", phone: "+254 700 000 112", days: -27, next: 4,
+    note: null, items: [["ZT-2481", "Flights MBA–DXB, 1 traveller", 74300, 27]] },
+  { name: "Mombasa Rotary Club", who: "Club secretary", phone: "+254 700 000 116", days: 96, next: -3,
+    note: "Secretary changed. Need the new contact's number.", noteBy: "Amina", noteOn: -15,
+    items: [["ZT-2361", "Conference delegates — hotel block, Diani", 132000, -96]] },
+];
+DEBTORS.forEach((d, i) => { d.id = i; d.owed = d.items.reduce((s, it) => s + it[2], 0); });
+
+/* ============================================================ helpers */
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const kes = n => "KES " + Math.round(n).toLocaleString("en-US");
+const compact = n => n >= 1e6 ? (n / 1e6).toFixed(n >= 1e7 ? 0 : 1).replace(/\.0$/, "") + "M" : n >= 1e3 ? Math.round(n / 1e3) + "K" : String(n);
+const fmtDay = n => { const d = addDays(n); return `${d.getDate()} ${MON[d.getMonth()]}`; };
+const initials = s => s.replace(/[^A-Za-z ]/g, "").split(/\s+/).filter(Boolean).slice(0, 2).map(w => w[0]).join("").toUpperCase();
+const ageBucket = days => days <= 0 ? 0 : days <= 30 ? 1 : days <= 60 ? 2 : days <= 90 ? 3 : 4;
+const AGES = [["Not yet due", "var(--age0)"], ["1–30 days late", "var(--age1)"], ["31–60 days late", "var(--age2)"], ["61–90 days late", "var(--age3)"], ["Over 90 days late", "var(--age4)"]];
+const ICON = {
+  search: `<svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><circle cx="9" cy="9" r="5.5"/><path d="M13 13l4 4"/></svg>`,
+  info: `<svg width="15" height="15" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><circle cx="10" cy="10" r="7.5"/><path d="M10 9v5M10 6.5v.01"/></svg>`,
+  x: `<svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M5 5l10 10M15 5L5 15"/></svg>`,
+  phone: `<svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M5 3h3l1.5 4-2 1.2a9 9 0 004.3 4.3L13 10.5l4 1.5v3a2 2 0 01-2 2A13 13 0 013 5a2 2 0 012-2z"/></svg>`,
+};
+
+function lateCell(days) {
+  const b = ageBucket(days);
+  const txt = days > 0 ? `${days} day${days === 1 ? "" : "s"} overdue` : days === 0 ? "Due today" : `Due in ${-days} days`;
+  const colour = days > 0 ? (b >= 3 ? "var(--bad)" : b === 2 ? "#a4521c" : "var(--warn)") : "var(--ink-2)";
+  return `<div class="late"><span class="txt" style="color:${colour}">${txt}</span>
+    <span class="scale" role="img" aria-label="${AGES[b][0]}">${AGES.map((a, i) => `<i style="${i <= b ? `background:${AGES[b][1]}` : ""}"></i>`).join("")}</span></div>`;
+}
+function nextCell(n) {
+  if (n < 0) return `<span class="pill p-bad">${-n} day${n === -1 ? "" : "s"} late</span><small>was due ${fmtDay(n)}</small>`;
+  if (n === 0) return `<span class="pill p-warn">Today</span>`;
+  if (n === 1) return `Tomorrow<small>${fmtDay(1)}</small>`;
+  return `${fmtDay(n)}<small>in ${n} days</small>`;
+}
+
+/* ============================================================ charts */
+const niceMax = v => { const raw = v / 4, p = 10 ** Math.floor(Math.log10(raw)), n = raw / p; return 4 * (n <= 1 ? 1 : n <= 2 ? 2 : n <= 2.5 ? 2.5 : n <= 5 ? 5 : 10) * p; };
+const bar = (x, y, w, h, r = 4) => { if (h <= 0) return ""; r = Math.min(r, h, w / 2); return `M${x},${y + h}V${y + r}Q${x},${y} ${x + r},${y}H${x + w - r}Q${x + w},${y} ${x + w},${y + r}V${y + h}Z`; };
+
+function salesChart() {
+  const W = 760, H = 300, L = 48, R = 8, T = 16, B = 30, iw = W - L - R, ih = H - T - B;
+  const max = niceMax(Math.max(...SALES, ...COLLECTED)), y = v => T + ih - v / max * ih;
+  const band = iw / 12, bw = Math.min(15, (band - 14) / 2);
+  let g = "", ax = "", bands = "", bars = "", hits = "";
+  for (let i = 0; i <= 4; i++) { const v = max / 4 * i; g += `<line x1="${L}" x2="${W - R}" y1="${y(v)}" y2="${y(v)}"/>`; ax += `<text x="${L - 10}" y="${y(v) + 4}" text-anchor="end">${i ? compact(v) : "0"}</text>`; }
+  MONTHS.forEach((m, i) => {
+    const cx = L + band * i + band / 2, last = i === 11;
+    ax += `<text x="${cx}" y="${H - 8}" text-anchor="middle">${m.short}${last ? "*" : ""}</text>`;
+    bands += `<rect class="band" data-b="${i}" x="${L + band * i + 3}" y="${T}" width="${band - 6}" height="${ih}" rx="6"/>`;
+    const hs = SALES[i] / max * ih, hc = COLLECTED[i] / max * ih;
+    bars += `<path d="${bar(cx - bw - 1.5, T + ih - hs, bw, hs)}" fill="var(--sales)" ${last ? 'opacity=".55"' : ""}/>`;
+    bars += `<path d="${bar(cx + 1.5, T + ih - hc, bw, hc)}" fill="var(--coll)" ${last ? 'opacity=".55"' : ""}/>`;
+    const tip = `<b>${m.long}${last ? " (so far)" : ""}</b><div class="r"><span><i style="background:var(--sales)"></i>Sales</span><span>${kes(SALES[i])}</span></div><div class="r"><span><i style="background:var(--coll)"></i>Collected</span><span>${kes(COLLECTED[i])}</span></div>`;
+    hits += `<rect class="hit" x="${L + band * i}" y="${T}" width="${band}" height="${ih + B}" data-b="${i}" data-tip="${esc(tip)}"/>`;
+  });
+  // label the best month
+  const best = SALES.indexOf(Math.max(...SALES)), bx = L + band * best + band / 2 - bw - 1.5 + bw / 2;
+  const label = `<text x="${bx}" y="${y(SALES[best]) - 8}" text-anchor="middle" style="font:600 11px var(--sans);fill:var(--ink)">${compact(SALES[best])}</text>`;
+  return `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Monthly sales and money collected, last 12 months"><g class="grid">${g}</g>${bands}${bars}<line class="base" x1="${L}" x2="${W - R}" y1="${T + ih}" y2="${T + ih}"/><g class="axis">${ax}</g>${label}${hits}</svg>`;
+}
+function spark(vals, colour) {
+  const W = 200, H = 36, max = Math.max(...vals), min = Math.min(...vals) * .85;
+  const pts = vals.map((v, i) => [i / (vals.length - 1) * W, H - 3 - (v - min) / (max - min) * (H - 8)]);
+  const line = pts.map(p => p.map(n => n.toFixed(1)).join(",")).join(" ");
+  const [lx, ly] = pts[pts.length - 1];
+  return `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" aria-hidden="true"><polygon points="0,${H} ${line} ${W},${H}" fill="${colour}" opacity=".08"/><polyline points="${line}" fill="none" stroke="${colour}" stroke-width="1.75" vector-effect="non-scaling-stroke" stroke-linejoin="round"/><circle cx="${lx}" cy="${ly}" r="3" fill="${colour}"/></svg>`;
+}
+
+/* ============================================================ views */
+const S = { period: "month", filter: "all", q: "", sort: "owed", dir: -1 };
+const page = document.getElementById("page");
+
+function overview() {
+  const m = 11, prev = 10;
+  const pick = (arr, p) => p === "month" ? arr[m] : p === "quarter" ? arr.slice(9).reduce((a, b) => a + b, 0) : arr.reduce((a, b) => a + b, 0);
+  const prevPick = (arr, p) => p === "quarter" ? arr.slice(6, 9).reduce((a, b) => a + b, 0) : null;
+  const monthEnd = new Date(TODAY.getFullYear(), TODAY.getMonth() + 1, 0).getDate(), daysLeft = monthEnd - TODAY.getDate();
+  const pace = (now, last) => `<b style="color:var(--ink)">${Math.round(now / last * 100)}%</b> of ${MONTHS[prev].long.split(" ")[0]}'s total, ${daysLeft} day${daysLeft === 1 ? "" : "s"} to go`;
+  const label = { month: `${MONTHS[m].long.split(" ")[0]} so far`, quarter: "Last 3 months", year: "Last 12 months" }[S.period];
+  const vsLabel = { month: `vs ${MONTHS[prev].long.split(" ")[0]}`, quarter: "vs the 3 months before" }[S.period];
+  const sales = pick(SALES, S.period), coll = pick(COLLECTED, S.period);
+  const delta = (now, before) => { if (before == null) return ""; const pct = Math.round((now - before) / before * 100); return `<span class="${pct >= 0 ? "up" : "down"}"><b>${pct >= 0 ? "↑" : "↓"} ${Math.abs(pct)}%</b></span> ${vsLabel}`; };
+  const owed = DEBTORS.reduce((s, d) => s + d.owed, 0);
+  const overdue = DEBTORS.filter(d => d.days > 0).reduce((s, d) => s + d.owed, 0);
+  const ages = AGES.map((_, i) => DEBTORS.filter(d => ageBucket(d.days) === i));
+  const svcTotal = SERVICES.reduce((s, x) => s + x[1], 0);
+  const today = TODAY.toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long" });
+
+  return `
+  <div class="head">
+    <div><h1>Business <em>overview</em></h1><p>${today} · all figures in Kenyan shillings</p></div>
+    <div class="seg" role="group" aria-label="Period">${[["month", "This month"], ["quarter", "3 months"], ["year", "12 months"]].map(([k, l]) => `<button data-period="${k}" aria-pressed="${S.period === k}">${l}</button>`).join("")}</div>
+  </div>
+  <div class="note">${ICON.info}<span>This is a design demo. Every customer, phone number and amount is fictional. The finished dashboard will show figures imported from your Excel records.</span></div>
+
+  <section class="kpis" aria-label="Key figures">
+    <div class="card kpi"><span class="lab">Sales</span><span class="val"><small>KES</small>${Math.round(sales).toLocaleString("en-US")}</span><span class="delta">${S.period === "month" ? pace(sales, SALES[prev]) : delta(sales, prevPick(SALES, S.period)) || label}</span><div class="spark">${spark(SALES, "#255a9e")}</div></div>
+    <div class="card kpi"><span class="lab">Money collected</span><span class="val"><small>KES</small>${Math.round(coll).toLocaleString("en-US")}</span><span class="delta">${S.period === "month" ? pace(coll, COLLECTED[prev]) : delta(coll, prevPick(COLLECTED, S.period)) || label}</span><div class="spark">${spark(COLLECTED, "#d9772b")}</div></div>
+    <div class="card kpi"><span class="lab">Owed to us</span><span class="val"><small>KES</small>${owed.toLocaleString("en-US")}</span><span class="delta">${DEBTORS.length} customers · as of today</span><div class="spark"><div class="ageing" style="margin:14px 0 0;height:10px">${ages.map((a, i) => { const v = a.reduce((s, d) => s + d.owed, 0); return v ? `<span style="flex:${v};background:${AGES[i][1]}"></span>` : ""; }).join("")}</div></div></div>
+    <div class="card kpi alert"><span class="lab">Overdue</span><span class="val"><small>KES</small>${overdue.toLocaleString("en-US")}</span><span class="delta">${Math.round(overdue / owed * 100)}% of what's owed · ${DEBTORS.filter(d => d.days > 0).length} customers</span>
+      <div class="spark" style="display:flex;align-items:flex-end"><a class="btn" href="#owed" data-goto-filter="overdue" style="height:32px;font-size:13px;padding:0 12px;white-space:nowrap">See who's overdue →</a></div></div>
+  </section>
+
+  <section class="grid-2">
+    <div class="card">
+      <div class="card-h"><div><h2>Sales and money collected</h2><p>Last 12 months · * ${MONTHS[11].short} so far</p></div>
+        <div class="legend"><span><i style="background:var(--sales)"></i>Sales</span><span><i style="background:var(--coll)"></i>Collected</span></div></div>
+      <div class="card-b chart">${salesChart()}</div>
+    </div>
+    <div class="card">
+      <div class="card-h"><div><h2>Sales by service</h2><p>Last 12 months</p></div></div>
+      <div class="card-b">${SERVICES.map(([n, v], i) => `<div class="hbar"><span>${n}</span><div class="track"><div class="fill" style="width:${(v / SERVICES[0][1] * 100).toFixed(1)}%;animation-delay:${i * 60}ms"></div></div><span class="v">${compact(v)}<span>${Math.round(v / svcTotal * 100)}%</span></span></div>`).join("")}
+        <p class="muted" style="font-size:12.5px;margin:14px 0 0">Total ${kes(svcTotal)}</p></div>
+    </div>
+  </section>
+
+  <section class="grid-even">
+    <div class="card">
+      <div class="card-h"><div><h2>How late is the money owed?</h2><p>${kes(owed)} across ${DEBTORS.length} customers</p></div></div>
+      <div class="card-b">
+        <div class="ageing" role="img" aria-label="Money owed by how late it is">${ages.map((a, i) => { const v = a.reduce((s, d) => s + d.owed, 0); return v ? `<span style="flex:${v};background:${AGES[i][1]};animation-delay:${i * 70}ms" data-tip="${esc(`<b>${AGES[i][0]}</b><div class="r"><span>${a.length} customer${a.length === 1 ? "" : "s"}</span><span>${kes(v)}</span></div>`)}"></span>` : ""; }).join("")}</div>
+        <div class="age-rows">${ages.map((a, i) => `<div class="age-row"><i style="background:${AGES[i][1]}"></i><span>${AGES[i][0]}</span><span class="n">${a.length} customer${a.length === 1 ? "" : "s"}</span><span class="v">${kes(a.reduce((s, d) => s + d.owed, 0))}</span></div>`).join("")}</div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-h"><div><h2>Largest balances</h2><p>The five customers who owe the most</p></div><a class="btn" href="#owed" style="height:34px;font-size:13px">See everyone</a></div>
+      <div class="card-b" style="padding-top:8px">${[...DEBTORS].sort((a, b) => b.owed - a.owed).slice(0, 5).map(d => `
+        <div class="age-row" style="grid-template-columns:36px 1fr auto;cursor:pointer" data-open="${d.id}" tabindex="0" role="button" aria-label="Open ${esc(d.name)}">
+          <span class="avatar">${initials(d.name)}</span>
+          <span style="min-width:0"><b style="font-weight:500;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(d.name)}</b><span class="n">${d.days > 0 ? `${d.days} days overdue` : `Due in ${-d.days} days`}</span></span>
+          <span class="v">${kes(d.owed)}</span></div>`).join("")}</div>
+    </div>
+  </section>`;
+}
+
+function owedView() {
+  const groups = { all: () => true, overdue: d => d.days > 0, late60: d => d.days > 60, soon: d => d.days <= 0 };
+  let rows = DEBTORS.filter(groups[S.filter]);
+  const q = S.q.trim().toLowerCase();
+  if (q) rows = rows.filter(d => d.name.toLowerCase().includes(q) || d.phone.replace(/\s/g, "").includes(q.replace(/\s/g, "")));
+  const key = { owed: d => d.owed, name: d => d.name.toLowerCase(), days: d => d.days, next: d => d.next }[S.sort];
+  rows.sort((a, b) => (key(a) > key(b) ? 1 : key(a) < key(b) ? -1 : 0) * S.dir);
+  const owed = DEBTORS.reduce((s, d) => s + d.owed, 0), overdue = DEBTORS.filter(d => d.days > 0);
+  const th = (k, l, cls = "") => `<th class="${cls}" ${S.sort === k ? `aria-sort="${S.dir > 0 ? "ascending" : "descending"}"` : ""}><button data-sort="${k}">${l}${S.sort === k ? (S.dir > 0 ? " ↑" : " ↓") : ""}</button></th>`;
+  return `
+  <div class="head"><div><h1>Who owes us <em>money?</em></h1><p>Every customer with an unpaid balance, as of today.</p></div></div>
+  <section class="totals">
+    <div class="card total"><div class="lab">Owed to us</div><div class="v">${kes(owed)}</div><div class="s">${DEBTORS.length} customers</div></div>
+    <div class="card total"><div class="lab">Overdue</div><div class="v" style="color:var(--bad)">${kes(overdue.reduce((s, d) => s + d.owed, 0))}</div><div class="s">${overdue.length} customers past their due date</div></div>
+    <div class="card total"><div class="lab">Follow-ups due today or late</div><div class="v">${DEBTORS.filter(d => d.next <= 0).length}</div><div class="s"><a href="#followups" style="color:var(--sales)">Open follow-ups →</a></div></div>
+  </section>
+  <div class="card">
+    <div class="toolbar">
+      <div class="search">${ICON.search}<label class="sr" for="q">Search</label><input id="q" value="${esc(S.q)}" placeholder="Search by name or phone" autocomplete="off"></div>
+      <span class="grow"></span>
+      <div class="chips" role="group" aria-label="Show">${[["all", "Everyone"], ["overdue", "Overdue"], ["late60", "Over 60 days"], ["soon", "Not yet due"]].map(([k, l]) => `<button class="chip" data-filter="${k}" aria-pressed="${S.filter === k}">${l}<span class="n">${DEBTORS.filter(groups[k]).length}</span></button>`).join("")}</div>
+    </div>
+    ${rows.length ? `<table class="list">
+      <thead><tr>${th("name", "Customer")}<th>Phone</th>${th("owed", "Amount owed", "r")}${th("days", "How late")}${th("next", "Next follow-up")}</tr></thead>
+      <tbody>${rows.map(d => `<tr tabindex="0" data-open="${d.id}">
+        <td><div class="who"><span class="avatar">${initials(d.name)}</span><div style="min-width:0"><b>${esc(d.name)}</b><span>${esc(d.who)}</span></div></div></td>
+        <td class="c-phone"><span class="phone">${esc(d.phone)}</span></td>
+        <td class="r c-amount"><span class="amount">${kes(d.owed)}</span></td>
+        <td class="c-late">${lateCell(d.days)}</td>
+        <td class="c-next"><div class="next">${nextCell(d.next)}</div></td></tr>`).join("")}</tbody></table>
+      <div class="foot"><span>${rows.length} of ${DEBTORS.length} customers</span><span>Click a customer to see what they owe and the latest note.</span></div>`
+    : `<div class="empty"><strong>No one matches</strong>${q ? `Nothing matches “${esc(S.q)}”. Check the spelling or clear the search.` : "No customers in this group."}</div>`}
+  </div>`;
+}
+
+function followupsView() {
+  const late = DEBTORS.filter(d => d.next < 0).sort((a, b) => a.next - b.next);
+  const today = DEBTORS.filter(d => d.next === 0).sort((a, b) => b.owed - a.owed);
+  const week = DEBTORS.filter(d => d.next > 0 && d.next <= 7).sort((a, b) => a.next - b.next);
+  const item = (d, edge) => `<div class="fu" tabindex="0" role="button" data-open="${d.id}" aria-label="Open ${esc(d.name)}">
+      <span class="edge" style="background:${edge}"></span>
+      <div class="who"><span class="avatar">${initials(d.name)}</span><div style="min-width:0"><b>${esc(d.name)}</b><span class="phone">${esc(d.phone)}</span></div></div>
+      <div class="why">${d.note ? `<q>${esc(d.note)}</q><small>${esc(d.noteBy)}, ${fmtDay(d.noteOn)}</small>` : `<span class="muted">Not contacted yet</span><small>First reminder</small>`}</div>
+      <div class="right"><span class="amount">${kes(d.owed)}</span>${d.days > 0 ? `<span class="pill p-bad">${d.days} days overdue</span>` : `<span class="pill p-ok">Due in ${-d.days} days</span>`}</div>
+    </div>`;
+  const group = (title, sub, list, edge) => `<section class="fu-group"><h2>${title}<span>${list.length} customer${list.length === 1 ? "" : "s"}</span></h2><p>${sub}</p>
+    <div class="card">${list.length ? list.map(d => item(d, edge)).join("") : `<div class="empty" style="padding:32px"><strong>All clear</strong>Nobody here.</div>`}</div></section>`;
+  return `
+  <div class="head"><div><h1>Follow-<em>ups</em></h1><p>Customers to contact, most urgent first.</p></div></div>
+  ${group("Late", "These follow-ups were due earlier and haven't happened yet.", late, "var(--bad)")}
+  ${group("Today", "Planned for today.", today, "var(--brand)")}
+  ${group("This week", "Coming up in the next 7 days.", week, "var(--line-2)")}`;
+}
+
+function drawer(id) {
+  const d = DEBTORS[id], el = document.getElementById("drawer");
+  el.innerHTML = `
+    <div class="drawer-h"><span class="avatar" style="width:46px;height:46px;font-size:15px">${initials(d.name)}</span>
+      <div><h3 id="dh">${esc(d.name)}</h3><p>${esc(d.who)}</p></div>
+      <button class="x" data-close aria-label="Close">${ICON.x}</button></div>
+    <div class="drawer-b">
+      <div><div class="sub-h">Amount owed</div><div class="big">${kes(d.owed)}</div><div style="margin-top:10px">${lateCell(d.days)}</div></div>
+      <dl class="dl"><dt>Phone</dt><dd class="phone">${esc(d.phone)}</dd><dt>Next follow-up</dt><dd>${d.next < 0 ? `<span class="pill p-bad">${-d.next} days late</span>` : d.next === 0 ? `<span class="pill p-warn">Today</span>` : fmtDay(d.next)}</dd></dl>
+      <div><div class="sub-h">What it's for</div>${d.items.map(([ref, desc, amt, due]) => `<div class="bk"><div><div>${esc(desc)}</div><div class="s"><span class="mono">${ref}</span> · ${due < 0 ? `was due ${fmtDay(due)}` : `due ${fmtDay(due)}`}</div></div><b class="num" style="font-weight:600;white-space:nowrap">${kes(amt)}</b></div>`).join("")}</div>
+      <div><div class="sub-h">Latest note</div>${d.note ? `<div class="quote"><b>${esc(d.noteBy)} · ${fmtDay(d.noteOn)}</b>${esc(d.note)}</div>` : `<div class="quote">No contact recorded yet.</div>`}</div>
+      <a class="btn dark" href="tel:${d.phone.replace(/\s/g, "")}">${ICON.phone}Call ${esc(d.phone)}</a>
+    </div>`;
+  el.classList.add("on"); el.setAttribute("aria-hidden", "false");
+  document.getElementById("scrim").classList.add("on");
+  setTimeout(() => el.querySelector("[data-close]").focus(), 50);
+  drawer.from = document.activeElement;
+}
+function closeDrawer() {
+  const el = document.getElementById("drawer");
+  if (!el.classList.contains("on")) return;
+  el.classList.remove("on"); el.setAttribute("aria-hidden", "true");
+  document.getElementById("scrim").classList.remove("on");
+}
+
+/* ============================================================ routing & events */
+const ROUTES = { overview: ["Overview", overview], owed: ["Who owes us money", owedView], followups: ["Follow-ups", followupsView] };
+function render(keepFocus) {
+  const r = ROUTES[location.hash.slice(1)] ? location.hash.slice(1) : "overview";
+  const due = DEBTORS.filter(d => d.next <= 0).length;
+  document.getElementById("tabs").innerHTML = Object.entries(ROUTES).map(([k, [l]]) => `<a href="#${k}" ${k === r ? 'aria-current="page"' : ""}>${l}${k === "followups" && due ? `<span class="count">${due}</span>` : ""}</a>`).join("");
+  page.innerHTML = ROUTES[r][1]();
+  document.title = `${ROUTES[r][0]} · Zaras Travel (demo)`;
+  if (keepFocus) { const q = document.getElementById("q"); if (q) { q.focus(); q.setSelectionRange(q.value.length, q.value.length); } }
+}
+window.addEventListener("hashchange", () => { closeDrawer(); render(); window.scrollTo(0, 0); });
+document.addEventListener("click", e => {
+  const t = e.target;
+  const p = t.closest("[data-period]"); if (p) { S.period = p.dataset.period; render(); return; }
+  const f = t.closest("[data-filter]"); if (f) { S.filter = f.dataset.filter; render(); return; }
+  const gf = t.closest("[data-goto-filter]"); if (gf) { S.filter = gf.dataset.gotoFilter; }
+  const s = t.closest("[data-sort]"); if (s) { const k = s.dataset.sort; S.dir = S.sort === k ? -S.dir : (k === "name" || k === "next" ? 1 : -1); S.sort = k; render(); return; }
+  const o = t.closest("[data-open]"); if (o && !t.closest("a")) { drawer(+o.dataset.open); return; }
+  if (t.closest("[data-close]") || t.id === "scrim") closeDrawer();
+});
+document.addEventListener("keydown", e => {
+  if (e.key === "Escape") { closeDrawer(); drawer.from && drawer.from.focus && drawer.from.focus(); }
+  const o = e.target.closest && e.target.closest("[data-open]");
+  if (o && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); drawer(+o.dataset.open); }
+});
+document.addEventListener("input", e => { if (e.target.id === "q") { S.q = e.target.value; render(true); } });
+
+const tip = document.getElementById("tip");
+document.addEventListener("mousemove", e => {
+  const h = e.target.closest && e.target.closest("[data-tip]");
+  document.querySelectorAll(".band").forEach(b => { b.style.opacity = h && h.dataset.b === b.dataset.b ? 1 : 0; });
+  if (!h) { tip.classList.remove("on"); return; }
+  tip.innerHTML = h.getAttribute("data-tip"); tip.classList.add("on");
+  const w = tip.offsetWidth, ht = tip.offsetHeight;
+  let x = e.clientX + 16, y = e.clientY - ht - 14;
+  if (x + w > innerWidth - 8) x = e.clientX - w - 16;
+  if (y < 8) y = e.clientY + 18;
+  tip.style.left = x + "px"; tip.style.top = y + "px";
+});
+render();
+</script>
+</body>
+</html>
